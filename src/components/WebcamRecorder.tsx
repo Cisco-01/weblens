@@ -33,6 +33,15 @@ const WebcamRecorder = () => {
     navigator.mediaDevices.enumerateDevices().then(handleDevices);
   }, [handleDevices]);
 
+  const handleDataAvailable = useCallback(
+    ({ data }: any) => {
+      if (data.size > 0) {
+        setRecordedChunks((prev) => prev.concat(data));
+      }
+    },
+    [setRecordedChunks]
+  );
+
   const handleStartCaptureClick = useCallback(() => {
     setCapturing(true);
     mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
@@ -43,16 +52,7 @@ const WebcamRecorder = () => {
       handleDataAvailable
     );
     mediaRecorderRef.current.start();
-  }, [webcamRef, setCapturing, mediaRecorderRef]);
-
-  const handleDataAvailable = useCallback(
-    ({ data }: any) => {
-      if (data.size > 0) {
-        setRecordedChunks((prev) => prev.concat(data));
-      }
-    },
-    [setRecordedChunks]
-  );
+  }, [webcamRef, setCapturing, mediaRecorderRef, handleDataAvailable]);
 
   const handleStopCaptureClick = useCallback(() => {
     mediaRecorderRef.current.stop();
@@ -61,7 +61,7 @@ const WebcamRecorder = () => {
     setTimeout(() => {
       setIsLoading(false);
     }, 500);
-  }, [mediaRecorderRef, webcamRef, setCapturing]);
+  }, [mediaRecorderRef, setCapturing]);
 
   const handleDownload = useCallback(() => {
     if (recordedChunks.length) {
