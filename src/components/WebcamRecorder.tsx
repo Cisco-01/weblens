@@ -11,6 +11,14 @@ const videoConstraints = {
   height: 720,
 };
 
+const constraints = {
+  audio: {
+    echoCancellation: false,
+    noiseSuppression: false,
+    sampleRate: 44100,
+  },
+};
+
 const WebcamRecorder = () => {
   const [isLoading, setIsLoading] = useState(true);
   const webcamRef = useRef<any>(null);
@@ -19,6 +27,7 @@ const WebcamRecorder = () => {
   const [capturing, setCapturing] = useState(false);
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const mediaRecorderRef = useRef<any>(null);
+  const [audioOn, setAudioOn] = useState(true);
 
   const [deviceId, setDeviceId] = useState<string>("");
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -44,24 +53,36 @@ const WebcamRecorder = () => {
 
   const handleStartCaptureClick = useCallback(() => {
     setCapturing(true);
-    mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
-      mimeType: "video/webm",
-    });
-    mediaRecorderRef.current.addEventListener(
-      "dataavailable",
-      handleDataAvailable
-    );
-    mediaRecorderRef.current.start();
+    navigator.mediaDevices
+      .getUserMedia(constraints)
+      .then((stream) => {
+        // Asigna el stream a tu componente Webcam
+        webcamRef.current.srcObject = stream;
+        mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
+          mimeType: "video/webm",
+        });
+        mediaRecorderRef.current.addEventListener(
+          "dataavailable",
+          handleDataAvailable
+        );
+        setIsLoading(true);
+        webcamRef.current.muted = false; // Establece muted en false al empezar a grabar
+        mediaRecorderRef.current.start();
+      })
+      .catch((error) => {
+        console.error("Error al acceder al audio del dispositivo:", error);
+      });
   }, [webcamRef, setCapturing, mediaRecorderRef, handleDataAvailable]);
 
   const handleStopCaptureClick = useCallback(() => {
     mediaRecorderRef.current.stop();
-    setCapturing(false);
+    webcamRef.current.muted = true; // Establece muted en true al detener la grabación
     // Retrasa la ejecución de setIsLoading(false) por 500ms
     setTimeout(() => {
+      setCapturing(false);
       setIsLoading(false);
     }, 500);
-  }, [mediaRecorderRef, setCapturing]);
+  }, [mediaRecorderRef, webcamRef]);
 
   const handleDownload = useCallback(() => {
     if (recordedChunks.length) {
@@ -74,10 +95,9 @@ const WebcamRecorder = () => {
       document.body.appendChild(a);
       a.style.display = "none";
       a.href = url;
-      a.download = "recorded-video.webm";
+      a.download = "recorded-video.mp4";
       a.click();
       window.URL.revokeObjectURL(url);
-      setRecordedChunks([]);
     } else if (imageSrc) {
       // Lógica para descargar la imagen
       const a = document.createElement("a");
@@ -140,15 +160,17 @@ const WebcamRecorder = () => {
               onClick={handleStartCaptureClick}
               className="bg-emerald-500 hover:bg-emerald-700 buttons"
             >
-              Start Capture
+              Record 🔴
             </button>
           </div>
         )}
       </div>
       <Webcam
         ref={webcamRef}
-        audio={false}
+        audio={audioOn}
+        muted={true}
         height={360}
+        audioConstraints={constraints.audio}
         screenshotFormat="image/png"
         width={720}
         videoConstraints={{

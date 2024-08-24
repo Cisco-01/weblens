@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Architects_Daughter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Architects_Daughter({ subsets: ["latin"], weight: ["400"] });
 
 export const metadata: Metadata = {
   title: "Web Lens",
-  description: "Take snapshots 🤳 and record videos through all your devices. All in one place.",
+  description: "Take snapshots with your current camera quality and save them in .PNG 🤳 Or record videos on any of your devices 📹 All in one place.",
 };
 
 export default function RootLayout({

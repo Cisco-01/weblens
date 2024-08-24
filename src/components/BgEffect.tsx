@@ -23,13 +23,13 @@ export const BgEffect: React.FC<PropsWithChildren> = ({ children }) => {
     <div
       onMouseMove={onMouseMove}
       className="overflow-scroll sm:overflow-hidden relative duration-700 
-      bg-gradient-to-tl from-indigo-400 via-black/50 to-indigo-400
-      group md:gap-8 h-screen w-full md:h-auto"
+      bg-gradient-to-t from-white to-orange-500
+      group md:gap-8 h-screen w-full md:h-full"
     >
       <div className="pointer-events-none">
         <div className="absolute inset-0 z-0 transition duration-1000 [mask-image:linear-gradient(black,transparent)]" />
         <motion.div
-          className="absolute inset-0 z-10 bg-gradient-to-br via-emerald-400/45 opacity-100 transition duration-1000 group-hover:opacity-50"
+          className="absolute inset-0 z-10 bg-gradient-to-br via-white opacity-100 transition duration-1000 group-hover:opacity-50"
           style={style}
         />
         <motion.div
